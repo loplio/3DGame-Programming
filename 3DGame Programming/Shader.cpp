@@ -42,14 +42,6 @@ D3D12_INPUT_LAYOUT_DESC CShader::CreateInputLayout()
 	return(d3dInputLayoutDesc);
 }
 
-D3D12_SHADER_BYTECODE CShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob)
-{
-	D3D12_SHADER_BYTECODE d3dShaderByteCode;
-	d3dShaderByteCode.BytecodeLength = 0;
-	d3dShaderByteCode.pShaderBytecode = NULL;
-	return(d3dShaderByteCode);
-}
-
 D3D12_RASTERIZER_DESC CShader::CreateRasterizerState()
 {
 	D3D12_RASTERIZER_DESC d3dRasterizerDesc;
@@ -69,6 +61,14 @@ D3D12_RASTERIZER_DESC CShader::CreateRasterizerState()
 	d3dRasterizerDesc.ForcedSampleCount = 0;
 	d3dRasterizerDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
 	return(d3dRasterizerDesc);
+}
+
+D3D12_SHADER_BYTECODE CShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob)
+{
+	D3D12_SHADER_BYTECODE d3dShaderByteCode;
+	d3dShaderByteCode.BytecodeLength = 0;
+	d3dShaderByteCode.pShaderBytecode = NULL;
+	return(d3dShaderByteCode);
 }
 
 D3D12_SHADER_BYTECODE CShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob)
@@ -239,8 +239,7 @@ CObjectsShader::~CObjectsShader()
 D3D12_INPUT_LAYOUT_DESC CObjectsShader::CreateInputLayout()
 {
 	UINT nInputElementDescs = 2;
-	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new
-		D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
 	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
 	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	pd3dInputElementDescs[1] = { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12,
@@ -283,7 +282,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	float fyPitch = 12.0f * 2.5f;
 	float fzPitch = 12.0f * 2.5f;
 	CRotatingObject* pRotatingObject = NULL;
-	for (int z = +zObjects; z >= -zObjects; z--)
+	for (int z = +zObjects; z >= -zObjects; --z)
 	{
 		for (int y = -yObjects; y <= yObjects; ++y)
 		{
@@ -299,22 +298,6 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 			}
 		}
 	}
-	//for (int x = -xObjects; x <= xObjects; ++x)
-	//{
-	//	for (int y = -yObjects; y <= yObjects; ++y)
-	//	{
-	//		for (int z = -zObjects; z <= zObjects; ++z)
-	//		{
-	//			pRotatingObject = new CRotatingObject();
-	//			pRotatingObject->SetMesh(pCubeMesh);
-	//			//각 정육면체 객체의 위치를 설정한다.
-	//			pRotatingObject->SetPosition(fxPitch * x, fyPitch * y, fzPitch * z);
-	//			pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-	//			pRotatingObject->SetRotationSpeed(10.0f * (i % 10) + 3.0f);
-	//			m_ppObjects[i++] = pRotatingObject;
-	//		}
-	//	}
-	//}
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 void CObjectsShader::ReleaseObjects()
