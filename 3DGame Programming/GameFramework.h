@@ -52,8 +52,6 @@ private:
 
 	CCamera*				m_pCamera = NULL;
 
-	CPlayer*				m_pPlayer = NULL;
-
 	CScene*					m_pScene = NULL;
 
 	CGameTimer				m_GameTimer;
@@ -63,6 +61,10 @@ private:
 	_TCHAR					m_pszFrameRate[50];
 
 public:
+	CPlayer* m_pPlayer = NULL;
+	//마지막으로 마우스 버튼을 클릭할 때의 마우스 커서의 위치이다.
+	//POINT m_ptOldCursorPos; 
+
 	bool OnCreate(HINSTANCE hInstance, HWND hWnd);
 
 	void BuildObjects();

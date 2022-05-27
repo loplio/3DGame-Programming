@@ -13,96 +13,102 @@ CScene::~CScene()
 
 void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	UINT vtx_n = 8;
-	XMFLOAT3 axis_y = XMFLOAT3{ 0.0f,1.0f,0.0f };
-
+	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 	m_nShaders = 1;
-	m_pShaders = new CObjectsShader[m_nShaders];
+	m_pShaders = new CInstancingShader[m_nShaders];
 	m_pShaders[0].CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	m_pShaders[0].BuildObjects(pd3dDevice, pd3dCommandList);
-	//m_nObjects = 1 + 1 + INFO_VTX_NUM(vtx_n) + 8;
-	//m_ppObjects = new CGameObject * [m_nObjects];
+	//UINT vtx_n = 8;
+	//XMFLOAT3 axis_y = XMFLOAT3{ 0.0f,1.0f,0.0f };
+	//m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	//CPlayerShader* pShader = new CPlayerShader();
-	//pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	//pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	//m_nShaders = 1;
+	//m_pShaders = new CObjectsShader[m_nShaders];
+	//m_pShaders[0].CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	//m_pShaders[0].BuildObjects(pd3dDevice, pd3dCommandList);
+	////m_nObjects = 1 + 1 + INFO_VTX_NUM(vtx_n) + 8;
+	////m_ppObjects = new CGameObject * [m_nObjects];
 
-	//CRotatingObject* pRotatingObject;
-	//CCubeMeshDiffused* pCubeMesh;
+	////CPlayerShader* pShader = new CPlayerShader();
+	////pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	////pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	///*________________*/
+	////CRotatingObject* pRotatingObject;
+	////CCubeMeshDiffused* pCubeMesh;
 
-	///* __오브젝트 0__ */
-	//CWallsObject* pWallObject = new CWallsObject();
+	/////*________________*/
 
-	//CWallMesh* pWallMesh = new CWallMesh(pd3dDevice, pd3dCommandList, 3000.0f, 5.0f, 3000.0f, 20);
-	//pWallObject->SetMesh(pWallMesh);
+	/////* __오브젝트 0__ */
+	////CWallsObject* pWallObject = new CWallsObject();
 
-	//pWallObject->SetShader(pShader);
+	////CWallMesh* pWallMesh = new CWallMesh(pd3dDevice, pd3dCommandList, 3000.0f, 5.0f, 3000.0f, 20);
+	////pWallObject->SetMesh(pWallMesh);
 
-	//pWallObject->SetPosition(0.0f, 0.0f, 0.0f);
+	////pWallObject->SetShader(pShader);
 
-	//m_ppObjects[0] = pWallObject;
-	///*________________*/
+	////pWallObject->SetPosition(0.0f, 0.0f, 0.0f);
 
-	///* __오브젝트 1__ */
-	//pWallObject = new CWallsObject();
+	////m_ppObjects[0] = pWallObject;
+	/////*________________*/
 
-	//pWallMesh = new CWallMesh(pd3dDevice, pd3dCommandList, 30.0f, 10.0f, 30.0f, 20);
-	//pWallObject->SetMesh(pWallMesh);
+	/////* __오브젝트 1__ */
+	////pWallObject = new CWallsObject();
 
-	//pWallObject->SetShader(pShader);
+	////pWallMesh = new CWallMesh(pd3dDevice, pd3dCommandList, 30.0f, 10.0f, 30.0f, 20);
+	////pWallObject->SetMesh(pWallMesh);
 
-	//pWallObject->SetPosition(50.0f, 1.0f, 0.0f);
+	////pWallObject->SetShader(pShader);
 
-	//m_ppObjects[1] = pWallObject;
-	///*________________*/
+	////pWallObject->SetPosition(50.0f, 1.0f, 0.0f);
 
-	///* __오브젝트 2__ */
-	//HermiteSpline hs;
-	//XMFLOAT3* info = new XMFLOAT3[INFO_VTX_NUM(vtx_n)];
-	//XMFLOAT3* SetPos = new XMFLOAT3[vtx_n]{
-	//	XMFLOAT3{ 100.0f, 0.0f, 0.0f }, XMFLOAT3{ 200.0f, 200.0f, 200.0f }, XMFLOAT3{ 500.0f, 300.0f, 500.0f }, XMFLOAT3{ 700.0f, 400.0f, 300.0f },
-	//	XMFLOAT3{ 500.0f, 350.0f, -100.0f }, XMFLOAT3{ 300.0f, 150.0f, -150.0f }, XMFLOAT3{ 130.0f, 60.0f, -70.0f },
-	//	XMFLOAT3{ 100.0f, 0.0f, 0.0f }
-	//};
-	//XMFLOAT3* SetVtx = new XMFLOAT3[vtx_n]{
-	//	XMFLOAT3{ 0.0f, 400.0f, 0.0f }, XMFLOAT3{ 0.0f, -50.0f, 0.0f }, XMFLOAT3{ 100.0f, -300.0f, 30.0f }, XMFLOAT3{ -50.0f, 100.0f, 70.0f },
-	//	XMFLOAT3{ 0.0f, -500.0f, 0.0f }, XMFLOAT3{ 0.0f, -300.0f, 0.0f }, XMFLOAT3{ 0.0f, -30.0f, 0.0f },
-	//	XMFLOAT3{ 0.0f, 100.0f, 0.0f }
-	//};
-	//hs.SetPosition(SetPos, vtx_n);
-	//hs.SetVector(SetVtx);
-	//hs.SetVector(XMFLOAT3{ 0.0f, 400.0f, 0.0f }, XMFLOAT3{ -100.0f, -200.0f, -200.0f });
-	//hs.GetInfo(info, LINE_SEP_NUM);
+	////m_ppObjects[1] = pWallObject;
+	/////*________________*/
 
-	//for (int i = 0; i < INFO_VTX_NUM(vtx_n); ++i) {
-	//	pRotatingObject = new CRotatingObject(info[i].x, info[i].y, info[i].z);
+	/////* __오브젝트 2__ */
+	////HermiteSpline hs;
+	////XMFLOAT3* info = new XMFLOAT3[INFO_VTX_NUM(vtx_n)];
+	////XMFLOAT3* SetPos = new XMFLOAT3[vtx_n]{
+	////	XMFLOAT3{ 100.0f, 0.0f, 0.0f }, XMFLOAT3{ 200.0f, 200.0f, 200.0f }, XMFLOAT3{ 500.0f, 300.0f, 500.0f }, XMFLOAT3{ 700.0f, 400.0f, 300.0f },
+	////	XMFLOAT3{ 500.0f, 350.0f, -100.0f }, XMFLOAT3{ 300.0f, 150.0f, -150.0f }, XMFLOAT3{ 130.0f, 60.0f, -70.0f },
+	////	XMFLOAT3{ 100.0f, 0.0f, 0.0f }
+	////};
+	////XMFLOAT3* SetVtx = new XMFLOAT3[vtx_n]{
+	////	XMFLOAT3{ 0.0f, 400.0f, 0.0f }, XMFLOAT3{ 0.0f, -50.0f, 0.0f }, XMFLOAT3{ 100.0f, -300.0f, 30.0f }, XMFLOAT3{ -50.0f, 100.0f, 70.0f },
+	////	XMFLOAT3{ 0.0f, -500.0f, 0.0f }, XMFLOAT3{ 0.0f, -300.0f, 0.0f }, XMFLOAT3{ 0.0f, -30.0f, 0.0f },
+	////	XMFLOAT3{ 0.0f, 100.0f, 0.0f }
+	////};
+	////hs.SetPosition(SetPos, vtx_n);
+	////hs.SetVector(SetVtx);
+	////hs.SetVector(XMFLOAT3{ 0.0f, 400.0f, 0.0f }, XMFLOAT3{ -100.0f, -200.0f, -200.0f });
+	////hs.GetInfo(info, LINE_SEP_NUM);
 
-	//	pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 6.0f, 1.5f, 12.0f);
-	//	pRotatingObject->SetMesh(pCubeMesh);
-	//	pRotatingObject->SetShader(pShader);
+	////for (int i = 0; i < INFO_VTX_NUM(vtx_n); ++i) {
+	////	pRotatingObject = new CRotatingObject(info[i].x, info[i].y, info[i].z);
 
-	//	if (i != 0) {
-	//		XMFLOAT3 Rot_v = Vector3::Subtract(info[i], info[i - 1]);
-	//		//std::cout << XMConvertToDegrees(atan2(Vector3::Length(Rot_v), Rot_v.x + Rot_v.y + Rot_v.z)) << std::endl;
-	//		pRotatingObject->Rotate(&axis_y, XMConvertToDegrees(atan2(Vector3::Length(Rot_v), Rot_v.x + Rot_v.y + Rot_v.z)));
-	//	}
+	////	pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 6.0f, 1.5f, 12.0f);
+	////	pRotatingObject->SetMesh(pCubeMesh);
+	////	pRotatingObject->SetShader(pShader);
 
-	//	m_ppObjects[i + 2] = pRotatingObject;
-	//}
-	///*________________*/
-	//for (int i = 0; i < 8; ++i) {
-	//	pRotatingObject = new CRotatingObject(SetPos[i].x, SetPos[i].y / 2, SetPos[i].z);
-	//	pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 3.0f, SetPos[i].y, 3.0f);
-	//	pRotatingObject->SetMesh(pCubeMesh);
-	//	pRotatingObject->SetShader(pShader);
+	////	if (i != 0) {
+	////		XMFLOAT3 Rot_v = Vector3::Subtract(info[i], info[i - 1]);
+	////		//std::cout << XMConvertToDegrees(atan2(Vector3::Length(Rot_v), Rot_v.x + Rot_v.y + Rot_v.z)) << std::endl;
+	////		pRotatingObject->Rotate(&axis_y, XMConvertToDegrees(atan2(Vector3::Length(Rot_v), Rot_v.x + Rot_v.y + Rot_v.z)));
+	////	}
 
-	//	m_ppObjects[i + m_nObjects - 8] = pRotatingObject;
-	//}
-	//((RegoPerson*)m_pPlayer)->course_RC = info;
-	//((RegoPerson*)m_pPlayer)->info_n = INFO_VTX_NUM(vtx_n);
-	////delete[] info;
+	////	m_ppObjects[i + 2] = pRotatingObject;
+	////}
+	/////*________________*/
+	////for (int i = 0; i < 8; ++i) {
+	////	pRotatingObject = new CRotatingObject(SetPos[i].x, SetPos[i].y / 2, SetPos[i].z);
+	////	pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 3.0f, SetPos[i].y, 3.0f);
+	////	pRotatingObject->SetMesh(pCubeMesh);
+	////	pRotatingObject->SetShader(pShader);
+
+	////	m_ppObjects[i + m_nObjects - 8] = pRotatingObject;
+	////}
+	////((RegoPerson*)m_pPlayer)->course_RC = info;
+	////((RegoPerson*)m_pPlayer)->info_n = INFO_VTX_NUM(vtx_n);
+	//////delete[] info;
 }
 
 bool CScene::ProcessInput(UCHAR* pKeysBuffer)
@@ -294,25 +300,27 @@ void CScene::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice)
 ID3D12RootSignature* CScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 {
 	ID3D12RootSignature* pd3dGraphicsRootSignature = NULL;
-	D3D12_ROOT_PARAMETER pd3dRootParameters[2];
+	D3D12_ROOT_PARAMETER pd3dRootParameters[3];
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 	pd3dRootParameters[0].Constants.Num32BitValues = 16;
-	pd3dRootParameters[0].Constants.ShaderRegister = 0;
+	pd3dRootParameters[0].Constants.ShaderRegister = 0; //b0: Player
 	pd3dRootParameters[0].Constants.RegisterSpace = 0;
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 	pd3dRootParameters[1].Constants.Num32BitValues = 32;
-	pd3dRootParameters[1].Constants.ShaderRegister = 1;
+	pd3dRootParameters[1].Constants.ShaderRegister = 1; //b1: Camera
 	pd3dRootParameters[1].Constants.RegisterSpace = 0;
 	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-
+	pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
+	pd3dRootParameters[2].Descriptor.ShaderRegister = 0; //t0
+	pd3dRootParameters[2].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags =
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS |
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS;
-
 	D3D12_ROOT_SIGNATURE_DESC d3dRootSignatureDesc;
 	::ZeroMemory(&d3dRootSignatureDesc, sizeof(D3D12_ROOT_SIGNATURE_DESC));
 	d3dRootSignatureDesc.NumParameters = _countof(pd3dRootParameters);
@@ -320,19 +328,56 @@ ID3D12RootSignature* CScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 	d3dRootSignatureDesc.NumStaticSamplers = 0;
 	d3dRootSignatureDesc.pStaticSamplers = NULL;
 	d3dRootSignatureDesc.Flags = d3dRootSignatureFlags;
-
 	ID3DBlob* pd3dSignatureBlob = NULL;
 	ID3DBlob* pd3dErrorBlob = NULL;
-
-	::D3D12SerializeRootSignature(&d3dRootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1,
+	D3D12SerializeRootSignature(&d3dRootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1,
 		&pd3dSignatureBlob, &pd3dErrorBlob);
 	pd3dDevice->CreateRootSignature(0, pd3dSignatureBlob->GetBufferPointer(),
 		pd3dSignatureBlob->GetBufferSize(), __uuidof(ID3D12RootSignature), (void
 			**)&pd3dGraphicsRootSignature);
-
 	if (pd3dSignatureBlob) pd3dSignatureBlob->Release();
 	if (pd3dErrorBlob) pd3dErrorBlob->Release();
 	return(pd3dGraphicsRootSignature);
+	//ID3D12RootSignature* pd3dGraphicsRootSignature = NULL;
+	//D3D12_ROOT_PARAMETER pd3dRootParameters[2];
+	//pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+	//pd3dRootParameters[0].Constants.Num32BitValues = 16;
+	//pd3dRootParameters[0].Constants.ShaderRegister = 0;
+	//pd3dRootParameters[0].Constants.RegisterSpace = 0;
+	//pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	//pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+	//pd3dRootParameters[1].Constants.Num32BitValues = 32;
+	//pd3dRootParameters[1].Constants.ShaderRegister = 1;
+	//pd3dRootParameters[1].Constants.RegisterSpace = 0;
+	//pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+
+	//D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags =
+	//	D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
+	//	D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
+	//	D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
+	//	D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS |
+	//	D3D12_ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS;
+
+	//D3D12_ROOT_SIGNATURE_DESC d3dRootSignatureDesc;
+	//::ZeroMemory(&d3dRootSignatureDesc, sizeof(D3D12_ROOT_SIGNATURE_DESC));
+	//d3dRootSignatureDesc.NumParameters = _countof(pd3dRootParameters);
+	//d3dRootSignatureDesc.pParameters = pd3dRootParameters;
+	//d3dRootSignatureDesc.NumStaticSamplers = 0;
+	//d3dRootSignatureDesc.pStaticSamplers = NULL;
+	//d3dRootSignatureDesc.Flags = d3dRootSignatureFlags;
+
+	//ID3DBlob* pd3dSignatureBlob = NULL;
+	//ID3DBlob* pd3dErrorBlob = NULL;
+
+	//::D3D12SerializeRootSignature(&d3dRootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1,
+	//	&pd3dSignatureBlob, &pd3dErrorBlob);
+	//pd3dDevice->CreateRootSignature(0, pd3dSignatureBlob->GetBufferPointer(),
+	//	pd3dSignatureBlob->GetBufferSize(), __uuidof(ID3D12RootSignature), (void
+	//		**)&pd3dGraphicsRootSignature);
+
+	//if (pd3dSignatureBlob) pd3dSignatureBlob->Release();
+	//if (pd3dErrorBlob) pd3dErrorBlob->Release();
+	//return(pd3dGraphicsRootSignature);
 }
 
 ID3D12RootSignature* CScene::GetGraphicsRootSignature()

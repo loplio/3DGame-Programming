@@ -3,7 +3,7 @@
 #define FIRST_PERSON_CAMERA			0x01
 #define SPACESHIP_CAMERA			0x02
 #define THIRD_PERSON_CAMERA			0x03
-#define ASPECT_RATIO (float(FRAME_BUFFER_WIDTH) / float(FRAME_BUFFER_HEIGHT))
+#define ASPECT_RATIO (float(FRAMEBUFFER_WIDTH) / float(FRAMEBUFFER_HEIGHT))
 
 struct VS_CB_CAMERA_INFO
 {
@@ -137,6 +137,7 @@ public:
 
 	void Rotate(float fPitch, float fYaw, float fRoll);
 
+	void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed) {}
 	void Update(CPlayer* pPlayer, XMFLOAT3& xmfLookAt, float fTimeElapsed = 0.016f);
 
 	bool IsInFrustum(BoundingOrientedBox& xmBoundingBox);

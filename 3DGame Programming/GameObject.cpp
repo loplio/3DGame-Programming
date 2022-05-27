@@ -179,7 +179,19 @@ void CGameObject::Render(HDC hDCFrameBuffer, CCamera* pCamera)
 {
 	if (pCamera->IsInFrustum(m_xmOOBB)) CGameObject::Render(hDCFrameBuffer, &m_xmf4x4World, m_pMesh);
 }
-
+//인스턴싱 정점 버퍼 뷰를 사용하여 메쉬를 렌더링한다.
+void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera,
+	UINT nInstances, D3D12_VERTEX_BUFFER_VIEW d3dInstancingBufferView)
+{
+	OnPrepareRender();
+	if (m_pMesh) m_pMesh->Render(pd3dCommandList, nInstances, d3dInstancingBufferView);
+}
+void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera,
+	UINT nInstances)
+{
+	OnPrepareRender();
+	if (m_pMesh) m_pMesh->Render(pd3dCommandList, nInstances);
+}
 void CGameObject::ReleaseUploadBuffers()
 {
 	//정점 버퍼를 위한 업로드 버퍼를 소멸시킨다.

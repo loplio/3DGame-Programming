@@ -70,10 +70,15 @@ void CGameFramework::BuildObjects()
 
 	//씬 객체를 생성하고 씬에 포함될 게임 객체들을 생성한다.
 	m_pScene = new CScene();
-	m_pPlayer = new RegoPerson();
+	//m_pPlayer = new RegoPerson();
 
-	m_pScene->SetPlayer(m_pPlayer, m_pd3dDevice, m_pd3dCommandList);
-	m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);								// 게임 오브젝트 생성.
+	if (m_pScene) {
+		//m_pScene->SetPlayer(m_pPlayer, m_pd3dDevice, m_pd3dCommandList);
+		m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);								// 게임 오브젝트 생성.
+	}
+	CAirplanePlayer* pAirplanePlayer = new CAirplanePlayer(m_pd3dDevice,
+		m_pd3dCommandList, m_pScene->GetGraphicsRootSignature());
+	m_pPlayer = pAirplanePlayer;
 	m_pCamera = m_pPlayer->GetCamera();
 
 	//씬 객체를 생성하기 위하여 필요한 그래픽 명령 리스트들을 명령 큐에 추가한다.
@@ -126,9 +131,10 @@ void CGameFramework::FrameAdvance()
 void CGameFramework::ProcessInput()				// Player의 연산 수행
 {
 	static UCHAR pKeyBuffer[256];
+	DWORD dwDirection = 0;					// 상황따라.. (키보드 입력 처리)
+
 	if (GetKeyboardState(pKeyBuffer))			// 키보드 연산
 	{
-		DWORD dwDirection = 0;					// 상황따라.. (키보드 입력 처리)
 		if (pKeyBuffer[VK_UP] & 0xF0) dwDirection |= DIR_FORWARD;
 		if (pKeyBuffer[VK_DOWN] & 0xF0) dwDirection |= DIR_BACKWARD;
 		if (pKeyBuffer[VK_LEFT] & 0xF0) dwDirection |= DIR_LEFT;
@@ -137,11 +143,11 @@ void CGameFramework::ProcessInput()				// Player의 연산 수행
 		if (pKeyBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
 		if (dwDirection) m_pPlayer->Move(dwDirection, m_pPlayer->m_fSpeed);
 
-		if (pKeyBuffer[0x52] & 0xF0) {
-			if (!((RegoPerson*)m_pPlayer)->riding) {
-				((RegoPerson*)m_pPlayer)->riding = true;
-			}
-		}
+		//if (pKeyBuffer[0x52] & 0xF0) {
+		//	if (!((RegoPerson*)m_pPlayer)->riding) {
+		//		((RegoPerson*)m_pPlayer)->riding = true;
+		//	}
+		//}
 	}
 
 	if (GetCapture() == m_hWnd)					// 마우스 입력을 받는 핸들을 넘겨줌
@@ -152,15 +158,20 @@ void CGameFramework::ProcessInput()				// Player의 연산 수행
 		float cxMouseDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x);
 		float cyMouseDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y);
 		SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
-		if (cxMouseDelta || cyMouseDelta)		// 상황따라.. (마우스 이동 시 처리)
+		if ((dwDirection != 0) || cxMouseDelta || cyMouseDelta)		// 상황따라.. (마우스 이동 시 처리)
 		{
-			if (pKeyBuffer[VK_RBUTTON] & 0xF0);
-			if (pKeyBuffer[VK_LBUTTON] & 0xF0) {	// Rotate를 마우스 좌표 이동만큼 넣어주면 마우스가 이동한 거리에 비례하는 각도가 돌아가는 방식이다. 
-				m_pPlayer->Rotate(cyMouseDelta, cxMouseDelta, 0.0f);
+			if (cxMouseDelta || cyMouseDelta)
+			{
+				if (pKeyBuffer[VK_RBUTTON] & 0xF0)
+					m_pPlayer->Rotate(cyMouseDelta, 0.0f, -cxMouseDelta);
+				if (pKeyBuffer[VK_LBUTTON] & 0xF0)		// Rotate를 마우스 좌표 이동만큼 넣어주면 마우스가 이동한 거리에 비례하는 각도가 돌아가는 방식이다. 
+					m_pPlayer->Rotate(cyMouseDelta, cxMouseDelta, 0.0f);
 			}
+			if (dwDirection)
+				m_pPlayer->Move(dwDirection, 50.0f * m_GameTimer.GetTimeElapsed(), true);
 		}
 	}
-	//m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
+	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
 }
 
 void CGameFramework::AnimateObjects()
@@ -187,18 +198,39 @@ void CGameFramework::HeapInitAndRendering()
 		m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	d3dRtvCPUDescriptorHandle.ptr += (m_nSwapChainBufferIndex * m_nRtvDescriptorIncrementSize);
 
+	// 0526 추가
+	float pfClearColor[4] = { 0.0f,0.125f,0.3f,1.0f };
+	m_pd3dCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, pfClearColor, 0, NULL);
+
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle =
 		m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, FALSE,
-		&d3dDsvCPUDescriptorHandle);
-
-	float pfClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f };
-	m_pd3dCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, pfClearColor, 0, NULL);
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle,
 		D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
+	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE,
+		&d3dDsvCPUDescriptorHandle);
+	// end
+
+	//D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle =
+	//	m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	//m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, FALSE,
+	//	&d3dDsvCPUDescriptorHandle);
+
+	//float pfClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f };
+	//m_pd3dCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, pfClearColor, 0, NULL);
+	//m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle,
+	//	D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 
 	// 랜더링
 	if (m_pScene) m_pScene->Render(m_pd3dCommandList, m_pCamera);
+
+//3인칭 카메라일 때 플레이어가 항상 보이도록 렌더링한다.
+#ifdef _WITH_PLAYER_TOP
+	//렌더 타겟은 그대로 두고 깊이 버퍼를 1.0으로 지우고 플레이어를 렌더링하면 플레이어는 무조건 그려질 것이다.
+	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, 
+	D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
+#endif
+	//3인칭 카메라일 때 플레이어를 렌더링한다.
+	if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
 
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
@@ -308,6 +340,14 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		}
 		break;
 	case WM_KEYUP:
+		switch (wParam)
+		{
+		case VK_F1:
+		case VK_F2:
+		case VK_F3:
+			if (m_pPlayer) m_pCamera = m_pPlayer->ChangeCamera((wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
+			break;
+		}
 		break;
 	default:
 		break;

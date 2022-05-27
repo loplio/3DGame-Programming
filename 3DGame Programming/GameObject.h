@@ -15,11 +15,11 @@ private:
 	int						m_nReferences = 0;
 
 protected:
-	XMFLOAT4X4				m_xmf4x4World;
 	CMesh*					m_pMesh = NULL;
 	CShader*				m_pShader = NULL;
 
 public:
+	XMFLOAT4X4				m_xmf4x4World;
 	BoundingOrientedBox		m_xmOOBB = BoundingOrientedBox();
 
 	void AddRef() { m_nReferences++; }
@@ -36,6 +36,7 @@ public:
 	XMFLOAT3 GetLook();
 	XMFLOAT3 GetUp();
 	XMFLOAT3 GetRight();
+	XMFLOAT4X4 GetWorld() { return m_xmf4x4World; }
 
 	void MoveStrafe(float fDistance = 1.0f);
 	void MoveUp(float fDistance = 1.0f);
@@ -55,7 +56,10 @@ public:
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void Render(HDC hDCFrameBuffer, CCamera* pCamera);
-
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, UINT
+		nInstances, D3D12_VERTEX_BUFFER_VIEW d3dInstancingBufferView);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, UINT
+		nInstances);
 	virtual void Animate(float fElapsedTime);
 
 	void UpdateBoundingBox();

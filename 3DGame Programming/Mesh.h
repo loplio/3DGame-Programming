@@ -105,6 +105,9 @@ public:
 	void SetPolygon(int nIndex, CPolygon* pPolygon);
 	virtual void Render(HDC hDCFrameBuffer);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, UINT nInstances);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, UINT nInstances,
+		D3D12_VERTEX_BUFFER_VIEW d3dInstancingBufferView);
 };
 
 class CTriangleMesh : public CMesh {
