@@ -76,9 +76,11 @@ void CGameFramework::BuildObjects()
 		//m_pScene->SetPlayer(m_pPlayer, m_pd3dDevice, m_pd3dCommandList);
 		m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);								// 게임 오브젝트 생성.
 	}
-	CAirplanePlayer* pAirplanePlayer = new CAirplanePlayer(m_pd3dDevice,
-		m_pd3dCommandList, m_pScene->GetGraphicsRootSignature());
-	m_pPlayer = pAirplanePlayer;
+	m_pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList,
+		m_pScene->GetGraphicsRootSignature(), m_pScene->GetTerrain(), 1);
+	//CAirplanePlayer* pAirplanePlayer = new CAirplanePlayer(m_pd3dDevice,
+	//	m_pd3dCommandList, m_pScene->GetGraphicsRootSignature());
+	//m_pPlayer = pAirplanePlayer;
 	m_pCamera = m_pPlayer->GetCamera();
 
 	//씬 객체를 생성하기 위하여 필요한 그래픽 명령 리스트들을 명령 큐에 추가한다.
@@ -142,7 +144,6 @@ void CGameFramework::ProcessInput()				// Player의 연산 수행
 		if (pKeyBuffer[VK_PRIOR] & 0xF0) dwDirection |= DIR_UP;
 		if (pKeyBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
 		if (dwDirection) m_pPlayer->Move(dwDirection, m_pPlayer->m_fSpeed);
-
 		//if (pKeyBuffer[0x52] & 0xF0) {
 		//	if (!((RegoPerson*)m_pPlayer)->riding) {
 		//		((RegoPerson*)m_pPlayer)->riding = true;

@@ -21,8 +21,8 @@ private:
 
 protected:
 	//배치(Batch) 처리를 하기 위하여 씬을 셰이더들의 리스트로 표현한다.
-	//CObjectsShader *m_pShaders = NULL;
-	CInstancingShader* m_pShaders = NULL;
+	CObjectsShader *m_pShaders = NULL;
+	//CInstancingShader* m_pShaders = NULL;
 
 	int m_nShaders = 0;
 	
@@ -33,6 +33,11 @@ protected:
 
 	//파이프라인 상태를 나타내는 인터페이스 포인터이다.
 	ID3D12PipelineState* m_pd3dPipelineState = NULL;
+
+protected:
+	CHeightMapTerrain* m_pTerrain = NULL;
+public:
+	CHeightMapTerrain* GetTerrain() { return(m_pTerrain); }
 
 public:
 	void CreateGraphicsPipelineState(ID3D12Device* pd3dDevice);

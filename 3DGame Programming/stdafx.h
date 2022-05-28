@@ -31,7 +31,6 @@
 #include <Mmsystem.h>
 #pragma comment(lib, "winmm.lib")		// timeGetTime()와 관련된 코드
 
-
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 using Microsoft::WRL::ComPtr;
@@ -47,7 +46,12 @@ using Microsoft::WRL::ComPtr;
 #define DIR_DOWN				0x20
 
 #define DegreeToRadian(x)		float((x)*3.141592654f/180.0f)
-#define EPSILON					1.0e-2f
+//#define EPSILON					1.0e-2f
+#define EPSILON 1.0e-10f
+inline bool IsZero(float fValue) { return((fabsf(fValue) < EPSILON)); }
+inline bool IsEqual(float fA, float fB) { return(::IsZero(fA - fB)); }
+inline float InverseSqrt(float fValue) { return 1.0f / sqrtf(fValue); }
+inline void Swap(float* pfS, float* pfT) { float fTemp = *pfS; *pfS = *pfT; *pfT = fTemp; }
 
 /*정점의 색상을 무작위로(Random) 설정하기 위해 사용한다. 각 정점의 색상은 난수(Random Number)를 생성하여
 지정한다.*/
@@ -60,9 +64,9 @@ using Microsoft::WRL::ComPtr;
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "dxguid.lib")
 
-#ifdef _DEBUG
 #include <iostream>
 #pragma comment(linker,"/entry:wWinMainCRTStartup /subsystem:console")
+#ifdef _DEBUG
 #endif
 
 //#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
@@ -76,6 +80,12 @@ extern ID3D12Resource* CreateBufferResource(ID3D12Device* pd3dDevice,
 //3차원 벡터의 연산
 namespace Vector3
 {
+	inline bool IsZero(XMFLOAT3& xmf3Vector)
+	{
+		if (::IsZero(xmf3Vector.x) && ::IsZero(xmf3Vector.y) && ::IsZero(xmf3Vector.z))
+			return(true);
+		return(false);
+	}
 	inline XMFLOAT3 XMVectorToFloat3(XMVECTOR& xmvVector)
 	{
 		XMFLOAT3 xmf3Result;
@@ -135,6 +145,19 @@ namespace Vector3
 		return(xmf3Result.x);
 	}
 	inline XMFLOAT3 CrossProduct(XMFLOAT3& xmf3Vector1, XMFLOAT3& xmf3Vector2, bool
+		bNormalize = true)
+	{
+		XMFLOAT3 xmf3Result;
+		if (bNormalize)
+			XMStoreFloat3(&xmf3Result,
+				XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&xmf3Vector1),
+					XMLoadFloat3(&xmf3Vector2))));
+		else
+			XMStoreFloat3(&xmf3Result, XMVector3Cross(XMLoadFloat3(&xmf3Vector1),
+				XMLoadFloat3(&xmf3Vector2)));
+		return(xmf3Result);
+	}
+	inline XMFLOAT3 CrossProduct(XMFLOAT3&& xmf3Vector1, XMFLOAT3& xmf3Vector2, bool
 		bNormalize = true)
 	{
 		XMFLOAT3 xmf3Result;
@@ -224,7 +247,15 @@ namespace Vector3
 //4차원 벡터의 연산
 namespace Vector4
 {
+
 	inline XMFLOAT4 Add(XMFLOAT4& xmf4Vector1, XMFLOAT4& xmf4Vector2)
+	{
+		XMFLOAT4 xmf4Result;
+		XMStoreFloat4(&xmf4Result, XMLoadFloat4(&xmf4Vector1) +
+			XMLoadFloat4(&xmf4Vector2));
+		return(xmf4Result);
+	}
+	inline XMFLOAT4 Add(XMFLOAT4&& xmf4Vector1, XMFLOAT4& xmf4Vector2)
 	{
 		XMFLOAT4 xmf4Result;
 		XMStoreFloat4(&xmf4Result, XMLoadFloat4(&xmf4Vector1) +

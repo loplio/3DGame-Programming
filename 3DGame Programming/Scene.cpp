@@ -14,101 +14,122 @@ CScene::~CScene()
 void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
+	//지형을 확대할 스케일 벡터이다. x-축과 z-축은 8배, y-축은 2배 확대한다.
+	XMFLOAT3 xmf3Scale(8.0f, 2.0f, 8.0f);
+	XMFLOAT4 xmf4Color(0.0f, 0.2f, 0.0f, 0.0f);
+	//지형을 높이 맵 이미지 파일(HeightMap.raw)을 사용하여 생성한다. 높이 맵의 크기는 가로x세로(257x257)이다.
+#ifdef _WITH_TERRAIN_PARTITION
+	/*하나의 격자 메쉬의 크기는 가로x세로(17x17)이다. 지형 전체는 가로 방향으로 16개, 세로 방향으로 16의 격자 메
+	쉬를 가진다. 지형을 구성하는 격자 메쉬의 개수는 총 256(16x16)개가 된다.*/
+	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList,
+		m_pd3dGraphicsRootSignature, _T("../Assets/Image/Terrain/HeightMap.raw"), 257, 257, 17,
+		17, xmf3Scale, xmf4Color);
+#else
+//지형을 하나의 격자 메쉬(257x257)로 생성한다.
+	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList,
+		m_pd3dGraphicsRootSignature, _T("terrain2.raw"), 1000, 1000, 1000,
+		400, xmf3Scale, xmf4Color);
+#endif
 	m_nShaders = 1;
-	m_pShaders = new CInstancingShader[m_nShaders];
+	m_pShaders = new CObjectsShader[m_nShaders];
 	m_pShaders[0].CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	m_pShaders[0].BuildObjects(pd3dDevice, pd3dCommandList);
-	//UINT vtx_n = 8;
-	//XMFLOAT3 axis_y = XMFLOAT3{ 0.0f,1.0f,0.0f };
+	m_pShaders[0].BuildObjects(pd3dDevice, pd3dCommandList, m_pTerrain);
 	//m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
-
 	//m_nShaders = 1;
-	//m_pShaders = new CObjectsShader[m_nShaders];
+	//m_pShaders = new CInstancingShader[m_nShaders];
 	//m_pShaders[0].CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	//m_pShaders[0].BuildObjects(pd3dDevice, pd3dCommandList);
-	////m_nObjects = 1 + 1 + INFO_VTX_NUM(vtx_n) + 8;
-	////m_ppObjects = new CGameObject * [m_nObjects];
+	////UINT vtx_n = 8;
+	////XMFLOAT3 axis_y = XMFLOAT3{ 0.0f,1.0f,0.0f };
+	////m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	////CPlayerShader* pShader = new CPlayerShader();
-	////pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	////pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	////m_nShaders = 1;
+	////m_pShaders = new CObjectsShader[m_nShaders];
+	////m_pShaders[0].CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	////m_pShaders[0].BuildObjects(pd3dDevice, pd3dCommandList);
+	//////m_nObjects = 1 + 1 + INFO_VTX_NUM(vtx_n) + 8;
+	//////m_ppObjects = new CGameObject * [m_nObjects];
 
-	////CRotatingObject* pRotatingObject;
-	////CCubeMeshDiffused* pCubeMesh;
+	//////CPlayerShader* pShader = new CPlayerShader();
+	//////pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	//////pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	/////*________________*/
+	//////CRotatingObject* pRotatingObject;
+	//////CCubeMeshDiffused* pCubeMesh;
 
-	/////* __오브젝트 0__ */
-	////CWallsObject* pWallObject = new CWallsObject();
+	///////*________________*/
 
-	////CWallMesh* pWallMesh = new CWallMesh(pd3dDevice, pd3dCommandList, 3000.0f, 5.0f, 3000.0f, 20);
-	////pWallObject->SetMesh(pWallMesh);
+	///////* __오브젝트 0__ */
+	//////CWallsObject* pWallObject = new CWallsObject();
 
-	////pWallObject->SetShader(pShader);
+	//////CWallMesh* pWallMesh = new CWallMesh(pd3dDevice, pd3dCommandList, 3000.0f, 5.0f, 3000.0f, 20);
+	//////pWallObject->SetMesh(pWallMesh);
 
-	////pWallObject->SetPosition(0.0f, 0.0f, 0.0f);
+	//////pWallObject->SetShader(pShader);
 
-	////m_ppObjects[0] = pWallObject;
-	/////*________________*/
+	//////pWallObject->SetPosition(0.0f, 0.0f, 0.0f);
 
-	/////* __오브젝트 1__ */
-	////pWallObject = new CWallsObject();
+	//////m_ppObjects[0] = pWallObject;
+	///////*________________*/
 
-	////pWallMesh = new CWallMesh(pd3dDevice, pd3dCommandList, 30.0f, 10.0f, 30.0f, 20);
-	////pWallObject->SetMesh(pWallMesh);
+	///////* __오브젝트 1__ */
+	//////pWallObject = new CWallsObject();
 
-	////pWallObject->SetShader(pShader);
+	//////pWallMesh = new CWallMesh(pd3dDevice, pd3dCommandList, 30.0f, 10.0f, 30.0f, 20);
+	//////pWallObject->SetMesh(pWallMesh);
 
-	////pWallObject->SetPosition(50.0f, 1.0f, 0.0f);
+	//////pWallObject->SetShader(pShader);
 
-	////m_ppObjects[1] = pWallObject;
-	/////*________________*/
+	//////pWallObject->SetPosition(50.0f, 1.0f, 0.0f);
 
-	/////* __오브젝트 2__ */
-	////HermiteSpline hs;
-	////XMFLOAT3* info = new XMFLOAT3[INFO_VTX_NUM(vtx_n)];
-	////XMFLOAT3* SetPos = new XMFLOAT3[vtx_n]{
-	////	XMFLOAT3{ 100.0f, 0.0f, 0.0f }, XMFLOAT3{ 200.0f, 200.0f, 200.0f }, XMFLOAT3{ 500.0f, 300.0f, 500.0f }, XMFLOAT3{ 700.0f, 400.0f, 300.0f },
-	////	XMFLOAT3{ 500.0f, 350.0f, -100.0f }, XMFLOAT3{ 300.0f, 150.0f, -150.0f }, XMFLOAT3{ 130.0f, 60.0f, -70.0f },
-	////	XMFLOAT3{ 100.0f, 0.0f, 0.0f }
-	////};
-	////XMFLOAT3* SetVtx = new XMFLOAT3[vtx_n]{
-	////	XMFLOAT3{ 0.0f, 400.0f, 0.0f }, XMFLOAT3{ 0.0f, -50.0f, 0.0f }, XMFLOAT3{ 100.0f, -300.0f, 30.0f }, XMFLOAT3{ -50.0f, 100.0f, 70.0f },
-	////	XMFLOAT3{ 0.0f, -500.0f, 0.0f }, XMFLOAT3{ 0.0f, -300.0f, 0.0f }, XMFLOAT3{ 0.0f, -30.0f, 0.0f },
-	////	XMFLOAT3{ 0.0f, 100.0f, 0.0f }
-	////};
-	////hs.SetPosition(SetPos, vtx_n);
-	////hs.SetVector(SetVtx);
-	////hs.SetVector(XMFLOAT3{ 0.0f, 400.0f, 0.0f }, XMFLOAT3{ -100.0f, -200.0f, -200.0f });
-	////hs.GetInfo(info, LINE_SEP_NUM);
+	//////m_ppObjects[1] = pWallObject;
+	///////*________________*/
 
-	////for (int i = 0; i < INFO_VTX_NUM(vtx_n); ++i) {
-	////	pRotatingObject = new CRotatingObject(info[i].x, info[i].y, info[i].z);
+	///////* __오브젝트 2__ */
+	//////HermiteSpline hs;
+	//////XMFLOAT3* info = new XMFLOAT3[INFO_VTX_NUM(vtx_n)];
+	//////XMFLOAT3* SetPos = new XMFLOAT3[vtx_n]{
+	//////	XMFLOAT3{ 100.0f, 0.0f, 0.0f }, XMFLOAT3{ 200.0f, 200.0f, 200.0f }, XMFLOAT3{ 500.0f, 300.0f, 500.0f }, XMFLOAT3{ 700.0f, 400.0f, 300.0f },
+	//////	XMFLOAT3{ 500.0f, 350.0f, -100.0f }, XMFLOAT3{ 300.0f, 150.0f, -150.0f }, XMFLOAT3{ 130.0f, 60.0f, -70.0f },
+	//////	XMFLOAT3{ 100.0f, 0.0f, 0.0f }
+	//////};
+	//////XMFLOAT3* SetVtx = new XMFLOAT3[vtx_n]{
+	//////	XMFLOAT3{ 0.0f, 400.0f, 0.0f }, XMFLOAT3{ 0.0f, -50.0f, 0.0f }, XMFLOAT3{ 100.0f, -300.0f, 30.0f }, XMFLOAT3{ -50.0f, 100.0f, 70.0f },
+	//////	XMFLOAT3{ 0.0f, -500.0f, 0.0f }, XMFLOAT3{ 0.0f, -300.0f, 0.0f }, XMFLOAT3{ 0.0f, -30.0f, 0.0f },
+	//////	XMFLOAT3{ 0.0f, 100.0f, 0.0f }
+	//////};
+	//////hs.SetPosition(SetPos, vtx_n);
+	//////hs.SetVector(SetVtx);
+	//////hs.SetVector(XMFLOAT3{ 0.0f, 400.0f, 0.0f }, XMFLOAT3{ -100.0f, -200.0f, -200.0f });
+	//////hs.GetInfo(info, LINE_SEP_NUM);
 
-	////	pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 6.0f, 1.5f, 12.0f);
-	////	pRotatingObject->SetMesh(pCubeMesh);
-	////	pRotatingObject->SetShader(pShader);
+	//////for (int i = 0; i < INFO_VTX_NUM(vtx_n); ++i) {
+	//////	pRotatingObject = new CRotatingObject(info[i].x, info[i].y, info[i].z);
 
-	////	if (i != 0) {
-	////		XMFLOAT3 Rot_v = Vector3::Subtract(info[i], info[i - 1]);
-	////		//std::cout << XMConvertToDegrees(atan2(Vector3::Length(Rot_v), Rot_v.x + Rot_v.y + Rot_v.z)) << std::endl;
-	////		pRotatingObject->Rotate(&axis_y, XMConvertToDegrees(atan2(Vector3::Length(Rot_v), Rot_v.x + Rot_v.y + Rot_v.z)));
-	////	}
+	//////	pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 6.0f, 1.5f, 12.0f);
+	//////	pRotatingObject->SetMesh(pCubeMesh);
+	//////	pRotatingObject->SetShader(pShader);
 
-	////	m_ppObjects[i + 2] = pRotatingObject;
-	////}
-	/////*________________*/
-	////for (int i = 0; i < 8; ++i) {
-	////	pRotatingObject = new CRotatingObject(SetPos[i].x, SetPos[i].y / 2, SetPos[i].z);
-	////	pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 3.0f, SetPos[i].y, 3.0f);
-	////	pRotatingObject->SetMesh(pCubeMesh);
-	////	pRotatingObject->SetShader(pShader);
+	//////	if (i != 0) {
+	//////		XMFLOAT3 Rot_v = Vector3::Subtract(info[i], info[i - 1]);
+	//////		//std::cout << XMConvertToDegrees(atan2(Vector3::Length(Rot_v), Rot_v.x + Rot_v.y + Rot_v.z)) << std::endl;
+	//////		pRotatingObject->Rotate(&axis_y, XMConvertToDegrees(atan2(Vector3::Length(Rot_v), Rot_v.x + Rot_v.y + Rot_v.z)));
+	//////	}
 
-	////	m_ppObjects[i + m_nObjects - 8] = pRotatingObject;
-	////}
-	////((RegoPerson*)m_pPlayer)->course_RC = info;
-	////((RegoPerson*)m_pPlayer)->info_n = INFO_VTX_NUM(vtx_n);
-	//////delete[] info;
+	//////	m_ppObjects[i + 2] = pRotatingObject;
+	//////}
+	///////*________________*/
+	//////for (int i = 0; i < 8; ++i) {
+	//////	pRotatingObject = new CRotatingObject(SetPos[i].x, SetPos[i].y / 2, SetPos[i].z);
+	//////	pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 3.0f, SetPos[i].y, 3.0f);
+	//////	pRotatingObject->SetMesh(pCubeMesh);
+	//////	pRotatingObject->SetShader(pShader);
+
+	//////	m_ppObjects[i + m_nObjects - 8] = pRotatingObject;
+	//////}
+	//////((RegoPerson*)m_pPlayer)->course_RC = info;
+	//////((RegoPerson*)m_pPlayer)->info_n = INFO_VTX_NUM(vtx_n);
+	////////delete[] info;
 }
 
 bool CScene::ProcessInput(UCHAR* pKeysBuffer)
@@ -145,6 +166,9 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
+
+	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
+
 	for (int i = 0; i < m_nShaders; i++)
 	{
 		m_pShaders[i].Render(pd3dCommandList, pCamera);
@@ -184,6 +208,7 @@ void CScene::ReleaseObjects()
 		m_pShaders[i].ReleaseObjects();
 	}
 	if (m_pShaders) delete[] m_pShaders;
+	if (m_pTerrain) delete m_pTerrain;
 	//if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
 	//if (m_ppObjects)
 	//{
@@ -206,6 +231,7 @@ void CScene::ReleaseObjects()
 void CScene::ReleaseUploadBuffers()
 {
 	for (int i = 0; i < m_nShaders; i++) m_pShaders[i].ReleaseUploadBuffers();
+	if (m_pTerrain) m_pTerrain->ReleaseUploadBuffers();
 	//if (m_ppObjects)
 	//{
 	//	for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j])
