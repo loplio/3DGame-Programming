@@ -77,7 +77,7 @@ class CRotatingObject : public CGameObject
 public:
 	//CRotatingObject() {};
 	CRotatingObject(int nMeshes = 1);
-	CRotatingObject(float x, float y, float z);
+	CRotatingObject(float x, float y, float z, int nMeshes = 1);
 	virtual ~CRotatingObject();
 
 private:

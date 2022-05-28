@@ -736,7 +736,7 @@ XMFLOAT4 CHeightMapGridMesh::OnGetColor(int x, int z, void* pContext)
 	CHeightMapImage* pHeightMapImage = (CHeightMapImage*)pContext;
 	XMFLOAT3 xmf3Scale = pHeightMapImage->GetScale();
 	//조명의 색상(세기, 밝기)이다.
-	XMFLOAT4 xmf4IncidentLightColor(0.9f, 0.3f, 0.4f, 1.0f);
+	XMFLOAT4 xmf4IncidentLightColor(0.9f, 0.8f, 0.4f, 1.0f);
 	/*정점 (x, z)에서 조명이 반사되는 양(비율)은 정점 (x, z)의 법선 벡터와 조명의 방향 벡터의 내적(cos)과 인접한 3개
 	의 정점 (x+1, z), (x, z+1), (x+1, z+1)의 법선 벡터와 조명의 방향 벡터의 내적을 평균하여 구한다. 정점 (x, z)의 색
 	상은 조명 색상(세기)과 반사되는 양(비율)을 곱한 값이다.*/

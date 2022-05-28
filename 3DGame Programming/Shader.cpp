@@ -1,4 +1,5 @@
 #include "Shader.h"
+#include "Method.h"
 #include "stdafx.h"
 
 CShader::CShader()
@@ -322,7 +323,10 @@ void CObjectsShader::ReleaseUploadBuffers()
 {
     if (m_ppObjects)
     {
-        for (int j = 0; j < m_nObjects; j++) m_ppObjects[j]->ReleaseUploadBuffers();
+        for (int j = 0; j < m_nObjects; j++) {
+            std::cout << "j = " << j << std::endl;
+            m_ppObjects[j]->ReleaseUploadBuffers();
+        }
     }
 }
 void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -464,6 +468,8 @@ void CInstancingShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCame
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //
+#define INFO_VTX_NUM(x) (x-1)*LINE_SEP_NUM
+#define LINE_SEP_NUM 50
 void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
     * pd3dCommandList, void* pContext)
 {
@@ -519,6 +525,48 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
         }
     }
     std::cout << "끝 " << std::endl << std::endl;
+    HermiteSpline hs;
+    UINT vtx_n = 7;
+    XMFLOAT3 axis_y = XMFLOAT3{ 0.0f,1.0f,0.0f };
+    XMFLOAT3* info = new XMFLOAT3[INFO_VTX_NUM(vtx_n)];
+    XMFLOAT3* SetPos = new XMFLOAT3[vtx_n]{
+		XMFLOAT3{4000.0f, 0.0f, 0.0f}, XMFLOAT3{3700.0f, 0.0f, 1000.0f}, XMFLOAT3{3200.0f, 0.0f, 2000.0f},
+        XMFLOAT3{3500.0f, 0.0f, 3000.0f}, XMFLOAT3{4000.0f, 0.0f, 4000.0f}, XMFLOAT3{5200.0f, 0.0f, 5000.0f},
+        XMFLOAT3{4900.0f, 0.0f, 6380.0f}
+    };
+    XMFLOAT3* SetVtx = new XMFLOAT3[vtx_n]{
+        XMFLOAT3{ -1000.0f, 0.0f, 0.0f }, XMFLOAT3{ 200.0f, 0.0f, 0.0f }, XMFLOAT3{ -200.0f, 0.0f, 0.0f },
+        XMFLOAT3{ -500.0f, 0.0f, 0.0f }, XMFLOAT3{ 1000.0f, 0.0f, 0.0f }, XMFLOAT3{ -300.0f, 0.0f, 0.0f },
+        XMFLOAT3{ 300.0f, 0.0f, 0.0f }
+    };
+    hs.SetPosition(SetPos, vtx_n);
+    hs.SetVector(SetVtx);
+    hs.SetVector(XMFLOAT3{ 0.0f, 400.0f, 0.0f }, XMFLOAT3{ -100.0f, -200.0f, -200.0f });
+    hs.GetInfo(info, LINE_SEP_NUM);
+	m_nObjects = INFO_VTX_NUM(vtx_n)*2;
+	m_ppObjects = new CGameObject * [m_nObjects];
+    CCubeMeshDiffused* pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList,
+        12.0f, 12.0f, 12.0f);
+	CRotatingObject* pRotatingObject = NULL;
+	for (int j = 0; j < 2; ++j) {
+		for (int i = 0; i < INFO_VTX_NUM(vtx_n); ++i) {
+			pRotatingObject = new CRotatingObject(info[i].x + 250 * j, pTerrain->GetHeight(info[i].x + 250 * j, info[i].z) + 6.0f, info[i].z, 1);
+			pRotatingObject->SetMesh(0, pCubeMesh);
+			/*지형의 표면에 위치하는 직육면체는 지형의 기울기에 따라 방향이 다르게 배치한다. 직육면체가 위치할 지형의 법선
+			벡터 방향과 직육면체의 y-축이 일치하도록 한다.*/
+			xmf3SurfaceNormal = pTerrain->GetNormal(info[i].x, info[i].z);
+			xmf3RotateAxis = Vector3::CrossProduct(XMFLOAT3(0.0f, 1.0f, 0.0f),
+				xmf3SurfaceNormal);
+			if (Vector3::IsZero(xmf3RotateAxis)) xmf3RotateAxis = XMFLOAT3(0.0f, 1.0f,
+				0.0f);
+			float fAngle = acos(Vector3::DotProduct(XMFLOAT3(0.0f, 1.0f, 0.0f),
+				xmf3SurfaceNormal));
+			pRotatingObject->Rotate(&xmf3RotateAxis, XMConvertToDegrees(fAngle));
+			pRotatingObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
+			pRotatingObject->SetRotationSpeed(36.0f * (i % 10) + 36.0f);
+			m_ppObjects[INFO_VTX_NUM(vtx_n) * j + i] = pRotatingObject;
+		}
+	}
     CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 CTerrainShader::CTerrainShader()

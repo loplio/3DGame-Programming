@@ -149,8 +149,8 @@ void CGameFramework::ProcessInput()				// Player의 연산 수행
 		//		((RegoPerson*)m_pPlayer)->riding = true;
 		//	}
 		//}
+		std::cout << "x: " << m_pPlayer->GetPosition().x << ", y: " << m_pPlayer->GetPosition().y << ", z: " << m_pPlayer->GetPosition().z << std::endl;
 	}
-
 	if (GetCapture() == m_hWnd)					// 마우스 입력을 받는 핸들을 넘겨줌
 	{
 		SetCursor(NULL);
