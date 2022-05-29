@@ -17,6 +17,7 @@
 #include <string>
 #include <wrl.h>
 #include <shellapi.h>
+#include <fstream>
 
 #include <DirectXMath.h>
 #include <DirectXPackedVector.h>
@@ -25,15 +26,18 @@
 
 #include <d3d12.h>
 #include <dxgi1_4.h>
-#include <d3dcompiler.h>
+#include <D3Dcompiler.h>
 #include <dxgidebug.h>
 
 #include <Mmsystem.h>
 #pragma comment(lib, "winmm.lib")		// timeGetTime()와 관련된 코드
-
+#ifdef _DEBUG
+#include <dxgidebug.h>
+#endif
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 using Microsoft::WRL::ComPtr;
+#define _WITH_CB_WORLD_MATRIX_DESCRIPTOR_TABLE
 
 #define FRAMEBUFFER_WIDTH		800
 #define FRAMEBUFFER_HEIGHT		600

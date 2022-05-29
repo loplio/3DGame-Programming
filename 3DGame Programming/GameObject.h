@@ -3,6 +3,71 @@
 #include "Camera.h"
 
 class CShader;
+class CObjectsShader;
+
+#define MATERIAL_ALBEDO_MAP			0x01
+#define MATERIAL_SPECULAR_MAP		0x02
+#define MATERIAL_NORMAL_MAP			0x04
+#define MATERIAL_METALLIC_MAP		0x08
+#define MATERIAL_EMISSION_MAP		0x10
+#define MATERIAL_DETAIL_ALBEDO_MAP	0x20
+#define MATERIAL_DETAIL_NORMAL_MAP	0x40
+
+struct MATERIALLOADINFO
+{
+	XMFLOAT4						m_xmf4AlbedoColor = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	XMFLOAT4						m_xmf4EmissiveColor = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	XMFLOAT4						m_xmf4SpecularColor = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+
+	float							m_fGlossiness = 0.0f;
+	float							m_fSmoothness = 0.0f;
+	float							m_fSpecularHighlight = 0.0f;
+	float							m_fMetallic = 0.0f;
+	float							m_fGlossyReflection = 0.0f;
+
+	UINT							m_nType = 0x00;
+
+	TCHAR							m_pstrAlbedoMapName[128] = { '\0' };
+	TCHAR							m_pstrSpecularMapName[128] = { '\0' };
+	TCHAR							m_pstrMetallicMapName[128] = { '\0' };
+	TCHAR							m_pstrNormalMapName[128] = { '\0' };
+	TCHAR							m_pstrEmissionMapName[128] = { '\0' };
+	TCHAR							m_pstrDetailAlbedoMapName[128] = { '\0' };
+	TCHAR							m_pstrDetailNormalMapName[128] = { '\0' };
+};
+
+struct MATERIALSLOADINFO
+{
+	int								m_nMaterials = 0;
+	MATERIALLOADINFO				*m_pMaterials = NULL;
+};
+
+class CMaterial
+{
+public:
+	CMaterial();
+	virtual ~CMaterial();
+
+private:
+	int								m_nReferences = 0;
+
+public:
+	void AddRef() { m_nReferences++; }
+	void Release() { if (--m_nReferences <= 0) delete this; }
+
+	CShader* m_pShader = NULL;
+
+	void SetShader(CShader* pShader);
+	void SetPseudoLightingShader() { SetShader(m_pPseudoLightingShader); }
+
+	void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList);
+
+protected:
+	static CShader					*m_pPseudoLightingShader;
+
+public:
+	static void PrepareShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CObjectsShader& ObShader);
+};
 
 class CGameObject {
 public:
@@ -50,6 +115,8 @@ public:
 	void SetColor(DWORD dwColor) { m_dwColor = dwColor; }
 	void SetPosition(float x, float y, float z);
 	void SetPosition(XMFLOAT3 xmf3Position);
+	void SetScale(float x, float y, float z);
+	void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
 
 	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
 	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
@@ -58,18 +125,48 @@ public:
 
 	virtual void OnPrepareRender();
 	void Render(HDC hDCFrameBuffer,XMFLOAT4X4* pxmf4x4World, CMesh* pMesh);
-	void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, const WCHAR* method = NULL);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void Render(HDC hDCFrameBuffer, CCamera* pCamera);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, UINT
 		nInstances, D3D12_VERTEX_BUFFER_VIEW d3dInstancingBufferView);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, UINT
 		nInstances);
-	virtual void Animate(float fElapsedTime);
+	//virtual void Animate(float fElapsedTime);
+	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 
 	void UpdateBoundingBox();
 
 	void ReleaseUploadBuffers();
+
+public:
+	TCHAR							m_pstrFrameName[256];
+
+	int								m_nMaterials = 0;
+	CMaterial						**m_ppMaterials = NULL;
+
+	CGameObject						*m_pParent = NULL;
+	CGameObject						*m_pChild = NULL;
+	CGameObject						*m_pSibling = NULL;
+	
+	void SetMaterial(int nMaterial, CMaterial* pMaterial);
+	void SetChild(CGameObject* pChild);
+	
+	virtual void BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) { }
+	
+	CGameObject* GetParent() { return(m_pParent); }
+	CGameObject* FindFrame(_TCHAR* pstrFrameName);
+
+	UINT GetMeshType() { return((m_pMesh) ? m_pMesh->GetType() : 0); }
+
+	static MATERIALSLOADINFO* LoadMaterialsInfoFromFile(std::wifstream& InFile);
+	static CMeshLoadInfo* LoadMeshInfoFromFile(std::wifstream& InFile);
+
+	static CGameObject* LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, std::wifstream& InFile);
+	static CGameObject* LoadGeometryFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, TCHAR* pstrFileName);
+	
+	static void PrintFrameInfo(CGameObject* pGameObject, CGameObject* pParent);
+
 };
 
 class CRotatingObject : public CGameObject
@@ -133,4 +230,21 @@ return(m_pHeightMapImage->GetHeightMapNormal(int(x / m_xmf3Scale.x), int(z /
 	//지형의 크기(가로/세로)를 반환한다. 높이 맵의 크기에 스케일을 곱한 값이다.
 	float GetWidth() { return(m_nWidth * m_xmf3Scale.x); }
 	float GetLength() { return(m_nLength * m_xmf3Scale.z); }
+};
+
+class CApacheObject : public CGameObject
+{
+public:
+	CApacheObject();
+	virtual ~CApacheObject();
+
+private:
+	CGameObject* m_pMainRotorFrame0 = NULL;
+	CGameObject* m_pMainRotorFrame1 = NULL;
+	CGameObject* m_pTailRotorFrame0 = NULL;
+	CGameObject* m_pTailRotorFrame1 = NULL;
+
+public:
+	virtual void OnInitialize();
+	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 };

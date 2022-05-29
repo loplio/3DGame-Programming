@@ -71,6 +71,7 @@ void CGameFramework::BuildObjects()
 	//씬 객체를 생성하고 씬에 포함될 게임 객체들을 생성한다.
 	m_pScene = new CScene();
 	//m_pPlayer = new RegoPerson();
+	std::cout << "첫번째" << m_pd3dPipelineState << std::endl;
 
 	if (m_pScene) {
 		//m_pScene->SetPlayer(m_pPlayer, m_pd3dDevice, m_pd3dCommandList);
@@ -82,6 +83,7 @@ void CGameFramework::BuildObjects()
 	//	m_pd3dCommandList, m_pScene->GetGraphicsRootSignature());
 	//m_pPlayer = pAirplanePlayer;
 	m_pCamera = m_pPlayer->GetCamera();
+	std::cout << "두번째" << m_pd3dPipelineState << std::endl;
 
 	//씬 객체를 생성하기 위하여 필요한 그래픽 명령 리스트들을 명령 큐에 추가한다.
 	m_pd3dCommandList->Close();
@@ -222,6 +224,7 @@ void CGameFramework::HeapInitAndRendering()
 	//	D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 
 	// 랜더링
+	std::cout << m_pd3dPipelineState << std::endl;
 	if (m_pScene) m_pScene->Render(m_pd3dCommandList, m_pCamera);
 
 //3인칭 카메라일 때 플레이어가 항상 보이도록 렌더링한다.

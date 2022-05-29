@@ -94,7 +94,7 @@ public:
 	void SetCameraOffset(XMFLOAT3& xmf3CameraOffset);
 
 	virtual void OnUpdateTransform();
-	virtual void Animate(float fElapsedTime);
+	//virtual void Animate(float fElapsedTime);
 	virtual void Render(HDC hDCFrameBuffer, CCamera* pCamera);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
@@ -129,7 +129,28 @@ public:
 	virtual void OnPrepareRender();
 };
 //-----------------------------------------------------------------------------------------------------
-class CTerrainPlayer : public CPlayer{
+class CModelPlayer : public CPlayer
+{
+public:
+	CModelPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	virtual ~CModelPlayer();
+
+	CGameObject* m_pMainRotorFrame0 = NULL;
+	CGameObject* m_pMainRotorFrame1 = NULL;
+	CGameObject* m_pTailRotorFrame0 = NULL;
+	CGameObject* m_pTailRotorFrame1 = NULL;
+
+private:
+	virtual void OnInitialize();
+	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
+
+public:
+	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
+	virtual void OnPrepareRender();
+};
+
+//-----------------------------------------------------------------------------------------------------
+class CTerrainPlayer : public CModelPlayer {
 public:
 	CTerrainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext, int nMeshes = 1);
